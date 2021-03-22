@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: php-lint
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: linter
+    tekton.dev/displayName: "PHP linter"
+spec:
+  description: >-
+    This task can be used to perform lint check on php files
+  workspaces:
+    - name: shared-workspace
+      description: A workspace containing files that we want to check
+  params:
+    - name: args
+      type: array
+      description: extra args that needs to be appended
+      default: ["--help"]
+  steps:
+    - name: lint-php-files
+      image: docker.io/cytopia/phplint:latest@sha256:909a93a260244bd91ecabb43bdbc32c5f1efa6d53c1489bf21550de01f97c868 #tag: latest-0.2
+      workingDir: $(workspaces.shared-workspace.path)
+      command:
+        - phplint
+      args:
+        - $(params.args)
